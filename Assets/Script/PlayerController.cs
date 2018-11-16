@@ -6,9 +6,10 @@ public class PlayerController : MonoBehaviour {
     private Animator        anim;
     private Rigidbody2D     rb2d;
     private BoxCollider2D   bbox;
-
+   
     bool facingRight = true;
     bool jump = false;
+    bool isTouchingWall = false;
 
     public float jumpForce = 1.0f;
     public float maxSpeed = 5f;
@@ -26,14 +27,15 @@ public class PlayerController : MonoBehaviour {
     }
 
     void FixedUpdate () {
-        Debug.Log(IsGrounded());
-
         float movement = Input.GetAxis("Horizontal");
         Vector2 moveVector = new Vector2(movement * maxSpeed, rb2d.velocity.y);
 
-        rb2d.velocity = moveVector;
+        anim.SetFloat("Speed", Mathf.Abs(moveVector.x));
 
-        anim.SetFloat("Speed", Mathf.Abs(rb2d.velocity.x));
+        Debug.Log(isTouchingWall + " " + movement + " " + facingRight);
+
+        if(!(isTouchingWall && !IsGrounded() && (movement > 0 && facingRight || (movement < 0 && !facingRight))))
+            rb2d.velocity = moveVector;
 
 
         if (movement > 0 && !facingRight)
@@ -48,9 +50,24 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
+    void OnCollisionEnter2D(Collision2D collision) {
+        Collider2D collider = collision.collider;
+
+        if (collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
+            isTouchingWall = true;
+    }
+
+    private void OnCollisionExit2D(Collision2D collision) {
+        Collider2D collider = collision.collider;
+
+        if (collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
+                isTouchingWall = false;
+    }
+
     bool IsGrounded() {
         int layers = LayerMask.GetMask("Ground");
         float distToGround = bbox.bounds.extents.y + 0.1f;
+
         return Physics2D.Raycast(transform.position, Vector2.down, distToGround, layers);
     }
 
