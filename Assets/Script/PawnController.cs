@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour {
+public abstract class PawnController : MonoBehaviour, IMoveable
+{
+    protected Rigidbody2D       rigidBody;
+    protected new Collider2D    collider;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
+    void Start ()
+    {
+        this.rigidBody = GetComponent<Rigidbody2D>();
+        this.collider = GetComponent<Collider2D>();
+    }
 	
-	// Update is called once per frame
 	void Update () {
-		
-	}
+
+    }
+
+    public abstract void Move();
 }
